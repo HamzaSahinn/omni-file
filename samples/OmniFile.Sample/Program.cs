@@ -3,36 +3,39 @@ using OmniFile.Core;
 using OmniFile.DependencyInjection;
 using OmniFile.Memory;
 using OmniFile.Physical;
+using OmniFile.Sample;
 
-// An application can load this mapping from JSON, a database, or another source at startup.
-var settings = new Dictionary<string, string>
-{
-    ["avatars"] = "memory",
-    ["documents"] = "physical"
-};
 
 var services = new ServiceCollection();
-services.AddSingleton<MemoryStorage>();
-services.AddSingleton(new PhysicalStorage(Path.Combine(AppContext.BaseDirectory, "sample-data")));
+
+services.AddMemoryStorage();
+services.AddPhysicalStorage(opt =>
+{
+    opt.RootDirectory = Path.Combine(AppContext.BaseDirectory, "sample-data");
+});
+
 services.AddOmniFile(routes =>
 {
-    foreach (var (category, providerName) in settings)
+    routes.Map(DomainEntityTwoStorable.StorageCategory, provider =>
     {
-        routes.Map(category, serviceProvider => providerName switch
-        {
-            "memory" => serviceProvider.GetRequiredService<MemoryStorage>(),
-            "physical" => serviceProvider.GetRequiredService<PhysicalStorage>(),
-            _ => throw new InvalidOperationException($"Unknown provider '{providerName}'.")
-        });
-    }
+        return provider.GetRequiredService<MemoryStorage>();
+    });
+
+    routes.Map(DomainEntityOneStorable.StorageCategory, provider =>
+    {
+        return provider.GetRequiredService<PhysicalStorage>();
+    });
 });
 
 using var provider = services.BuildServiceProvider();
 var manager = provider.GetRequiredService<IStorageManager>();
-IStorable avatar = new Storable("avatars", "people/alice.txt");
+
+IStorable avatar = new DomainEntityOneStorable(45);
+
 await using (var input = new MemoryStream("Hello, OmniFile"u8.ToArray()))
     await manager.WriteAsync(avatar, input, new StorageWriteOptions { ContentType = "text/plain" });
 
 await using var output = await manager.OpenReadAsync(avatar);
 using var reader = new StreamReader(output);
+
 Console.WriteLine(await reader.ReadToEndAsync());

@@ -16,12 +16,21 @@ public sealed class OmniFileBuilder
 
     public OmniFileBuilder Map(string category, Func<IServiceProvider, IObjectStorage> storageFactory)
     {
-        if (_sealed) throw new InvalidOperationException("Storage routes cannot be changed after registration.");
+        if (_sealed)
+        {
+            throw new InvalidOperationException("Storage routes cannot be changed after registration.");
+        }
+
         ArgumentException.ThrowIfNullOrWhiteSpace(category);
         ArgumentNullException.ThrowIfNull(storageFactory);
+
         if (_routes.Any(route => string.Equals(route.Category, category, StringComparison.Ordinal)))
+        {
             throw new ArgumentException($"Category '{category}' is registered more than once.", nameof(category));
+
+        }
         _routes.Add((category, storageFactory));
+        
         return this;
     }
 
@@ -40,10 +49,13 @@ public static class OmniFileServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configure);
+
         var builder = new OmniFileBuilder();
         configure(builder);
         builder.Seal();
+        
         services.AddSingleton<IStorageManager>(provider => new StorageManager(builder.Build(provider)));
+        
         return services;
     }
 }

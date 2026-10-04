@@ -7,14 +7,16 @@ public sealed class PhysicalStorage : IObjectStorage
 {
     private readonly string _root;
     private readonly string _rootPrefix;
-    private readonly StringComparison _pathComparison;
+    private readonly StringComparison _pathComparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
-    public PhysicalStorage(string rootDirectory)
+    public PhysicalStorage(PhysicalStorageOptions options)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(rootDirectory);
-        _root = Path.GetFullPath(rootDirectory);
-        _rootPrefix = Path.EndsInDirectorySeparator(_root) ? _root : _root + Path.DirectorySeparatorChar;
-        _pathComparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        ArgumentNullException.ThrowIfNull(options, nameof(options));
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.RootDirectory, nameof(options.RootDirectory));
+
+        _root = Path.GetFullPath(options.RootDirectory);
+
+        _rootPrefix = Path.EndsInDirectorySeparator(_root) ? _root : _root + Path.DirectorySeparatorChar;        
     }
 
     public Task<Stream> OpenReadAsync(string key, CancellationToken cancellationToken = default)

@@ -33,8 +33,25 @@ public sealed class StorageManager : IStorageManager
     public Task WriteAsync(IStorable item, Stream content, StorageWriteOptions? options = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(content);
-        if (!content.CanRead) throw new ArgumentException("Content stream must be readable.", nameof(content));
+        if (!content.CanRead)
+        {
+            throw new ArgumentException("Content stream must be readable.", nameof(content));
+        }
+
         var storage = Resolve(item);
+        
+        if(options != null && string.IsNullOrEmpty(options.ContentType))
+        {
+            options.ContentType = item.ContentType;
+        }
+        else if (options == null)
+        {
+            options = new StorageWriteOptions()
+            {
+                ContentType = item.ContentType
+            };
+        }
+
         return storage.WriteAsync(item.Key, content, options, cancellationToken);
     }
 

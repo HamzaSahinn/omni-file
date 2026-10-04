@@ -4,8 +4,11 @@ namespace OmniFile.Core;
 public interface IStorable
 {
     string Category { get; }
+
     string Key { get; }
+
+    string ContentType { get; }
 }
 
 /// <summary>A ready-to-use descriptor for content that has no domain type.</summary>
-public sealed record Storable(string Category, string Key) : IStorable;
+public sealed record Storable(string Category, string Key, string ContentType) : IStorable;

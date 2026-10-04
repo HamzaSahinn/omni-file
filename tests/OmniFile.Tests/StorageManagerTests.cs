@@ -37,7 +37,7 @@ public sealed class StorageManagerTests
         });
         using var serviceProvider = services.BuildServiceProvider();
         var manager = serviceProvider.GetRequiredService<IStorageManager>();
-        await manager.WriteAsync(new Storable("avatars", "x.bin"), new MemoryStream([1]));
+        await manager.WriteAsync(new Storable("avatars", "x.bin", "text/plain"), new MemoryStream([1]));
         Assert.True(await memory.ExistsAsync("x.bin"));
     }
 
@@ -48,7 +48,7 @@ public sealed class StorageManagerTests
         Assert.Throws<ArgumentException>(() => new StorageManager([
             new("avatars", storage), new("avatars", storage)]));
         var manager = new StorageManager([new("avatars", storage)]);
-        await Assert.ThrowsAsync<StorageCategoryNotFoundException>(() => manager.ExistsAsync(new Storable("other", "a.bin")));
+        await Assert.ThrowsAsync<StorageCategoryNotFoundException>(() => manager.ExistsAsync(new Storable("other", "a.bin", "text/plain")));
         var builder = new OmniFileBuilder().Map("avatars", storage);
         Assert.Throws<ArgumentException>(() => builder.Map("avatars", storage));
     }
@@ -57,5 +57,7 @@ public sealed class StorageManagerTests
     {
         public string Category => "avatars";
         public string Key => $"{Id}.png";
+
+        public string ContentType => "text/plain";
     }
 }

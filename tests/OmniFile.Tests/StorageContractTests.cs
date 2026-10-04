@@ -121,7 +121,7 @@ public sealed class StorageContractTests
             if (physical)
             {
                 _directory = Path.Combine(AppContext.BaseDirectory, "test-data", Guid.NewGuid().ToString("N"));
-                Storage = new PhysicalStorage(_directory);
+                Storage = new PhysicalStorage(new PhysicalStorageOptions() { RootDirectory = _directory});
             }
             else Storage = new MemoryStorage();
         }
