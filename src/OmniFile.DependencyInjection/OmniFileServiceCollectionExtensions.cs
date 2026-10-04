@@ -30,7 +30,7 @@ public sealed class OmniFileBuilder
 
         }
         _routes.Add((category, storageFactory));
-        
+
         return this;
     }
 
@@ -53,9 +53,9 @@ public static class OmniFileServiceCollectionExtensions
         var builder = new OmniFileBuilder();
         configure(builder);
         builder.Seal();
-        
+
         services.AddSingleton<IStorageManager>(provider => new StorageManager(builder.Build(provider)));
-        
+
         return services;
     }
 }

@@ -39,8 +39,8 @@ public sealed class StorageManager : IStorageManager
         }
 
         var storage = Resolve(item);
-        
-        if(options != null && string.IsNullOrEmpty(options.ContentType))
+
+        if (options != null && string.IsNullOrEmpty(options.ContentType))
         {
             options.ContentType = item.ContentType;
         }

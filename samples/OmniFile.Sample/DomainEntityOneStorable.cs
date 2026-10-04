@@ -1,15 +1,14 @@
-﻿using OmniFile.Core;
-using System;
+using OmniFile.Core;
 
 namespace OmniFile.Sample
 {
     public class DomainEntityOneStorable : IStorable
     {
         private int id;
-        
+
         public DomainEntityOneStorable(int entityId)
         {
-            id = entityId;    
+            id = entityId;
         }
 
         public static string StorageCategory => "DomainEntity1";

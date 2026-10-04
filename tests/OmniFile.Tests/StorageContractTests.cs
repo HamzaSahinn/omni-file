@@ -45,7 +45,10 @@ public sealed class StorageContractTests
         using var fixture = new ProviderFixture(physical);
         await fixture.Storage.WriteAsync("one.bin", new MemoryStream([1]));
         await Assert.ThrowsAsync<StorageObjectAlreadyExistsException>(() =>
-            fixture.Storage.WriteAsync("one.bin", new MemoryStream([2]), new() { Overwrite = false }));
+            fixture.Storage.WriteAsync("one.bin", new MemoryStream([2]), new()
+            {
+                Overwrite = false
+            }));
         await using var read = await fixture.Storage.OpenReadAsync("one.bin");
         Assert.Equal(1, read.ReadByte());
     }
@@ -94,7 +97,10 @@ public sealed class StorageContractTests
     public async Task Memory_preserves_content_type_and_lists_prefix()
     {
         var storage = new MemoryStorage();
-        await storage.WriteAsync("photos/a.png", new MemoryStream([1]), new() { ContentType = "image/png" });
+        await storage.WriteAsync("photos/a.png", new MemoryStream([1]), new()
+        {
+            ContentType = "image/png"
+        });
         await storage.WriteAsync("photos/b.png", new MemoryStream([2]));
         await storage.WriteAsync("other/c.png", new MemoryStream([3]));
         Assert.Equal("image/png", (await storage.GetInfoAsync("photos/a.png"))?.ContentType);
@@ -114,21 +120,26 @@ public sealed class StorageContractTests
     private sealed class ProviderFixture : IDisposable
     {
         private readonly string? _directory;
-        public IObjectStorage Storage { get; }
+        public IObjectStorage Storage
+        {
+            get;
+        }
 
         public ProviderFixture(bool physical)
         {
             if (physical)
             {
                 _directory = Path.Combine(AppContext.BaseDirectory, "test-data", Guid.NewGuid().ToString("N"));
-                Storage = new PhysicalStorage(new PhysicalStorageOptions() { RootDirectory = _directory});
+                Storage = new PhysicalStorage(new PhysicalStorageOptions() { RootDirectory = _directory });
             }
-            else Storage = new MemoryStorage();
+            else
+                Storage = new MemoryStorage();
         }
 
         public void Dispose()
         {
-            if (_directory is not null && Directory.Exists(_directory)) Directory.Delete(_directory, recursive: true);
+            if (_directory is not null && Directory.Exists(_directory))
+                Directory.Delete(_directory, recursive: true);
         }
     }
 
@@ -139,7 +150,10 @@ public sealed class StorageContractTests
         public override bool CanSeek => false;
         public override bool CanWrite => false;
         public override long Length => throw new NotSupportedException();
-        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public override long Position
+        {
+            get => throw new NotSupportedException(); set => throw new NotSupportedException();
+        }
         public override int Read(byte[] buffer, int offset, int count) => _inner.Read(buffer, offset, count);
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) =>
             _inner.ReadAsync(buffer, cancellationToken);
@@ -147,6 +161,11 @@ public sealed class StorageContractTests
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
         public override void SetLength(long value) => throw new NotSupportedException();
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-        protected override void Dispose(bool disposing) { if (disposing) _inner.Dispose(); base.Dispose(disposing); }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                _inner.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using OmniFile.Core;
+using System.Collections.Concurrent;
 
 namespace OmniFile.Memory;
 
@@ -13,7 +13,8 @@ public sealed class MemoryStorage : IObjectStorage
     {
         StorageKey.Validate(key);
         cancellationToken.ThrowIfCancellationRequested();
-        if (!_items.TryGetValue(key, out var entry)) throw new StorageObjectNotFoundException(key);
+        if (!_items.TryGetValue(key, out var entry))
+            throw new StorageObjectNotFoundException(key);
         return Task.FromResult<Stream>(new MemoryStream(entry.Bytes, writable: false));
     }
 
@@ -21,13 +22,16 @@ public sealed class MemoryStorage : IObjectStorage
     {
         StorageKey.Validate(key);
         ArgumentNullException.ThrowIfNull(content);
-        if (!content.CanRead) throw new ArgumentException("Content stream must be readable.", nameof(content));
+        if (!content.CanRead)
+            throw new ArgumentException("Content stream must be readable.", nameof(content));
         options ??= new StorageWriteOptions();
         await using var buffer = new MemoryStream();
         await content.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
         var entry = new Entry(buffer.ToArray(), options.ContentType, DateTimeOffset.UtcNow);
-        if (options.Overwrite) _items[key] = entry;
-        else if (!_items.TryAdd(key, entry)) throw new StorageObjectAlreadyExistsException(key);
+        if (options.Overwrite)
+            _items[key] = entry;
+        else if (!_items.TryAdd(key, entry))
+            throw new StorageObjectAlreadyExistsException(key);
     }
 
     public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
@@ -58,7 +62,8 @@ public sealed class MemoryStorage : IObjectStorage
     /// <summary>Lists keys beneath a prefix. This is a provider-specific convenience API.</summary>
     public IReadOnlyList<string> ListKeys(string? prefix = null)
     {
-        if (prefix is not null) StorageKey.Validate(prefix);
+        if (prefix is not null)
+            StorageKey.Validate(prefix);
         var pathPrefix = prefix is null ? string.Empty : prefix + "/";
         return _items.Keys.Where(key => key.StartsWith(pathPrefix, StringComparison.Ordinal))
             .OrderBy(key => key, StringComparer.Ordinal).ToArray();

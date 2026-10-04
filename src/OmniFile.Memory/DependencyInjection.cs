@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OmniFile.Memory
 {
@@ -7,7 +7,7 @@ namespace OmniFile.Memory
         public static IServiceCollection AddMemoryStorage(this IServiceCollection services)
         {
             services.AddSingleton<MemoryStorage>();
-            
+
             return services;
         }
     }

@@ -16,7 +16,7 @@ public sealed class PhysicalStorage : IObjectStorage
 
         _root = Path.GetFullPath(options.RootDirectory);
 
-        _rootPrefix = Path.EndsInDirectorySeparator(_root) ? _root : _root + Path.DirectorySeparatorChar;        
+        _rootPrefix = Path.EndsInDirectorySeparator(_root) ? _root : _root + Path.DirectorySeparatorChar;
     }
 
     public Task<Stream> OpenReadAsync(string key, CancellationToken cancellationToken = default)
@@ -41,7 +41,10 @@ public sealed class PhysicalStorage : IObjectStorage
     public async Task WriteAsync(string key, Stream content, StorageWriteOptions? options = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(content);
-        if (!content.CanRead) throw new ArgumentException("Content stream must be readable.", nameof(content));
+        if (!content.CanRead)
+        {
+            throw new ArgumentException("Content stream must be readable.", nameof(content));
+        }
         var path = GetPath(key);
         cancellationToken.ThrowIfCancellationRequested();
         options ??= new StorageWriteOptions();
@@ -58,7 +61,10 @@ public sealed class PhysicalStorage : IObjectStorage
                 await output.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
             cancellationToken.ThrowIfCancellationRequested();
-            try { File.Move(temp, path, options.Overwrite); }
+            try
+            {
+                File.Move(temp, path, options.Overwrite);
+            }
             catch (IOException) when (!options.Overwrite && File.Exists(path))
             {
                 throw new StorageObjectAlreadyExistsException(key);
@@ -66,7 +72,10 @@ public sealed class PhysicalStorage : IObjectStorage
         }
         finally
         {
-            if (File.Exists(temp)) File.Delete(temp);
+            if (File.Exists(temp))
+            {
+                File.Delete(temp);
+            }
         }
     }
 
@@ -81,7 +90,10 @@ public sealed class PhysicalStorage : IObjectStorage
     {
         var path = GetPath(key);
         cancellationToken.ThrowIfCancellationRequested();
-        try { File.Delete(path); }
+        try
+        {
+            File.Delete(path);
+        }
         catch (DirectoryNotFoundException) { /* Deleting a missing key is idempotent. */ }
         return Task.CompletedTask;
     }
@@ -102,7 +114,11 @@ public sealed class PhysicalStorage : IObjectStorage
     {
         var directory = directoryKey is null ? _root : GetPath(directoryKey);
         EnsureNoLinks(directory);
-        if (!Directory.Exists(directory)) return [];
+        if (!Directory.Exists(directory))
+        {
+            return [];
+        }
+
         return Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly)
             .Where(path => !Path.GetFileName(path).StartsWith(".omnifile-", StringComparison.Ordinal))
             .Select(path => Path.GetRelativePath(_root, path).Replace(Path.DirectorySeparatorChar, '/'))
@@ -114,7 +130,10 @@ public sealed class PhysicalStorage : IObjectStorage
         StorageKey.Validate(key);
         var path = Path.GetFullPath(Path.Combine(_root, key.Replace('/', Path.DirectorySeparatorChar)));
         if (!path.StartsWith(_rootPrefix, _pathComparison))
+        {
             throw new ArgumentException("Storage key escapes the configured root.", nameof(key));
+        }
+
         EnsureNoLinks(path);
         return path;
     }
@@ -133,8 +152,9 @@ public sealed class PhysicalStorage : IObjectStorage
 
     private static void CheckLink(string path)
     {
-        if ((File.Exists(path) || Directory.Exists(path)) &&
-            (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        if ((File.Exists(path) || Directory.Exists(path)) && (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        {
             throw new IOException($"Symbolic links are not supported within a physical storage root: '{path}'.");
+        }
     }
 }
