@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <Version>0.1.0-alpha.1</Version>
+    <Authors>OmniFile contributors</Authors>
+    <PackageTags>storage;filesystem;abstraction;streams</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+.vs/
+TestResults/
+**/test-data/
+**/sample-data/
+artifacts/
